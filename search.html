@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>JSearch</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000000; /* Default background color */
+            color: #ffffff; /* Default text color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: inherit; /* Inherit text color from body */
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            width: 600px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 10px;
+            font-size: 18px;
+            background-color: #333333;
+            color: #ffffff;
+        }
+
+        .search-button {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-button img {
+            width: 24px;
+            height: 24px;
+            display: block;
+        }
+
+        .search-button.no-bg img {
+            display: none; /* Hide image if no background */
+        }
+
+        .search-button:hover {
+            background-color: #dddddd;
+        }
+
+        .menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .menu select {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 12px;
+            border: 1px solid #555555;
+            background-color: #222222;
+            color: #ffffff;
+        }
+
+        .background-menu {
+            position: absolute;
+            bottom: -585px;
+            right: 10px;
+        }
+
+        .background-button {
+            font-size: 18px;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .background-button:hover {
+            color: #cccccc;
+        }
+
+        .background-options {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            bottom: 53px;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .background-options button {
+            margin-top: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #ffffff;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .background-options button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .shortcuts {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .shortcut-button {
+            background-color: #444444;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .shortcut-button:hover {
+            background-color: #666666;
+        }
+
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu">
+        <select id="searchEngineSelector">
+            <option value="https://www.google.com/search?q=" selected>Google</option>
+            <option value="https://www.bing.com/search?q=">Bing</option>
+            <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+            <option value="https://search.yahoo.com/search?p=">Yahoo</option>
+        </select>
+        <div class="background-menu">
+            <button class="background-button" onclick="toggleBackgroundOptions()">Custom Background</button>
+            <div class="background-options" id="backgroundOptions">
+                <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="setCustomBackground(this)">
+                <button onclick="document.getElementById('fileInput').click()">Choose Image</button>
+                <button onclick="changeBackground('#000000', '#ffffff')">Black Background</button>
+                <button onclick="changeBackground('#ffffff', '#000000')">White Background</button>
+                <button onclick="clearBackground()">Delete Background</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="title">JSearch</div>
+
+    <div class="search-container">
+        <input id="searchInput" type="text" class="search-input" placeholder="Search or type a URL">
+        <button id="searchButton" class="search-button" onclick="performSearch()">
+            
+        </button>
+    </div>
+
+    <div class="shortcuts">
+        <button class="shortcut-button" onclick="window.location.href='https://web.whatsapp.com'">WA</button>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Retrieve saved settings from localStorage
+            const savedBgColor = localStorage.getItem('bgColor');
+            const savedTextColor = localStorage.getItem('textColor');
+            const savedBgImage = localStorage.getItem('bgImage');
+
+            // Apply saved background color and text color if they exist
+            if (savedBgColor) {
+                document.body.style.backgroundColor = savedBgColor;
+                document.body.style.color = savedTextColor;
+                document.querySelector('.title').style.color = savedTextColor;
+                document.querySelector('.search-input').style.backgroundColor = savedBgColor === '#000000' ? '#333333' : '#dddddd';
+                document.querySelector('.search-input').style.color = savedTextColor;
+                document.querySelector('.search-button').style.backgroundColor = savedTextColor;
+                document.querySelectorAll('.background-button').forEach(button => button.style.color = savedTextColor);
+
+                // Check if background image is removed and hide image if necessary
+                if (!savedBgImage) {
+                    document.getElementById('searchButton').classList.add('no-bg');
+                }
+            }
+
+            // Apply saved background image if it exists
+            if (savedBgImage) {
+                document.body.style.backgroundImage = `url(${savedBgImage})`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                document.body.style.backgroundPosition = 'center';
+                document.getElementById('searchButton').classList.remove('no-bg');
+            }
+        });
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            const searchEngine = document.getElementById('searchEngineSelector').value;
+            if (query) {
+                const urlPattern = /^https?:\/\//;
+                if (urlPattern.test(query)) {
+                    window.location.href = query;
+                } else {
+                    window.location.href = `${searchEngine}${encodeURIComponent(query)}`;
+                }
+            }
+        }
+
+        function changeBackground(bgColor, textColor) {
+            document.body.style.backgroundColor = bgColor;
+            document.body.style.color = textColor;
+            document.querySelector('.title').style.color = textColor;
+            document.querySelector('.search-input').style.backgroundColor = bgColor === '#000000' ? '#333333' : '#dddddd';
+            document.querySelector('.search-input').style.color = textColor;
+            document.querySelector('.search-button').style.backgroundColor = textColor;
+            document.querySelectorAll('.background-button').forEach(button => button.style.color = textColor);
+
+            // Save the changes to localStorage
+            localStorage.setItem('bgColor', bgColor);
+            localStorage.setItem('textColor', textColor);
+        }
+
+        function setCustomBackground(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url(${e.target.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                    document.body.style.backgroundPosition = 'center';
+                    localStorage.setItem('bgImage', e.target.result);
+                    document.getElementById('searchButton').classList.remove('no-bg');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearBackground() {
+            document.body.style.backgroundImage = '';
+            document.body.style.backgroundSize = '';
+            document.body.style.backgroundRepeat = '';
+            document.body.style.backgroundPosition = '';
+
+            localStorage.removeItem('bgColor');
+            localStorage.removeItem('textColor');
+            localStorage.removeItem('bgImage');
+
+            document.querySelector('.title').style.color = '#ffffff'; // Default text color
+            document.querySelector('.search-input').style.backgroundColor = '#333333'; // Default input background
+            document.querySelector('.search-input').style.color = '#ffffff'; // Default input text color
+            document.querySelector('.search-button').style.backgroundColor = '#ffffff'; // Default button color
+            document.querySelectorAll('.background-button').forEach(button => button.style.color = '#ffffff'); // Default button text color
+
+            // Add class to hide image if no background
+            document.getElementById('searchButton').classList.add('no-bg');
+        }
+
+        function toggleBackgroundOptions() {
+            const options = document.getElementById('backgroundOptions');
+            options.style.display = options.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // Add event listener for Enter key in search input
+        document.getElementById('searchInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+<head>
+</html>
